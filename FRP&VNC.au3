@@ -4,7 +4,7 @@
 #AutoIt3Wrapper_UseX64=n
 #AutoIt3Wrapper_Res_Comment=VNC自动挂载FRP程序
 #AutoIt3Wrapper_Res_Description=由WXW编辑制作
-#AutoIt3Wrapper_Res_Fileversion=1.0.0.15
+#AutoIt3Wrapper_Res_Fileversion=1.0.0.16
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_LegalCopyright=@WXW
 #AutoIt3Wrapper_Res_Language=4100
@@ -105,6 +105,7 @@ Func Example()
 				;MsgBox(0, "提示-" & @CPUArch, $cat_netstat)
 				;=======================================================================
 			Case $msg = $start
+				GUICtrlSetState($start, $GUI_DISABLE);按键变灰色
 				;=======================================================================
 				;运行VNCS和FRPS
 				Run(@ComSpec & ' /c ' & 'netsh advfirewall firewall add rule name="vncserver.exe" dir=in program=".\' & @CPUArch & '\vncserver.exe" action=allow', '', @SW_HIDE);防火墙放行端口
@@ -117,7 +118,6 @@ Func Example()
 				RegWrite($HKLM & "\Software\RealVNC\vncserver", "EnableAutoUpdateChecks", "REG_SZ", "0")
 				Run(".\" & @CPUArch & "\vncserver.exe -service -start", '', @SW_HIDE);开启vncserver服务
 				Run(".\" & @CPUArch & "\frpc.exe -c frpc.ini", '', @SW_HIDE);运行frpc服务
-				GUICtrlSetState($start, $GUI_DISABLE);按键变灰色
 				;=======================================================================
 			Case $msg = $stop
 				;=======================================================================
@@ -125,6 +125,8 @@ Func Example()
 				ProcessClose("vncserver.exe");停止vncserver服务
 				Run(".\" & @CPUArch & "\vncserver.exe -service -stop", '', @SW_HIDE);停止vncserver服务
 				Run(@ComSpec & ' /c ' & 'netsh advfirewall firewall delete rule name="vncserver.exe"', '', @SW_HIDE);防火墙关闭端口
+				Run(@ComSpec & ' /c ' & 'sc stop vncserver', '', @SW_HIDE)
+				Run(@ComSpec & ' /c ' & 'sc delete vncserver', '', @SW_HIDE)
 				GUICtrlSetState($start, $GUI_ENABLE);按键变可用
 				;MsgBox(0, "提示-" & @CPUArch, "服务已停止")
 				;=======================================================================
@@ -147,6 +149,8 @@ Func Example()
 				ProcessClose("frpc.exe");停止frpc服务
 				ProcessClose("vncserver.exe");停止vncserver服务
 				Run(".\" & @CPUArch & "\vncserver.exe -service -stop", '', @SW_HIDE);停止vncserver服务
+				Run(@ComSpec & ' /c ' & 'sc stop vncserver', '', @SW_HIDE)
+				Run(@ComSpec & ' /c ' & 'sc delete vncserver', '', @SW_HIDE)
 				Run(@ComSpec & ' /c ' & 'netsh advfirewall firewall delete rule name="vncserver.exe"', '', @SW_HIDE);防火墙关闭端口
 				ExitLoop
 				;=======================================================================
